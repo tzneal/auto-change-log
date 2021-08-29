@@ -3,7 +3,7 @@ package changelog_test
 import (
 	"testing"
 
-	"github.com/tzneal/auto-change-log/cmd/auto-change-log/changelog"
+	"github.com/tzneal/auto-change-log/changelog"
 )
 
 func TestClassifyRule(t *testing.T) {

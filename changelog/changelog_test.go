@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tzneal/auto-change-log/cmd/auto-change-log/changelog"
+	"github.com/tzneal/auto-change-log/changelog"
 )
 
 func TestChangeLog_EmptyWrite(t *testing.T) {

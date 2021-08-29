@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
-	"github.com/tzneal/auto-change-log/cmd/auto-change-log/changelog"
+	"github.com/tzneal/auto-change-log/changelog"
 )
 
 func init() {
