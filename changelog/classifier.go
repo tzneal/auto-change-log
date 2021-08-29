@@ -7,10 +7,11 @@ import (
 )
 
 type Classifier struct {
-	DefaultType EntryType
-	Rules       []ClassifyRule
-	IgnoreMerge bool
-	Entries     []Entry
+	DefaultType     EntryType
+	IgnoreMerge     bool
+	ClassifyRules   []ClassifyRule
+	IssueExtractors []IssueExtractor
+	Entries         []Entry
 }
 
 func NewClassifier() *Classifier {
@@ -34,10 +35,19 @@ func (c *Classifier) ProcessCommit(commit *object.Commit) error {
 	}
 
 	bestRulePriority := -1
-	for _, r := range c.Rules {
+	for _, r := range c.ClassifyRules {
 		if r.Priority > bestRulePriority && r.Match(commit.Message) {
 			bestRulePriority = r.Priority
 			e.Type = r.EntryType
+		}
+	}
+
+	// append references to any issues found in the commit message
+	for _, ie := range c.IssueExtractors {
+		result := ie.Match(commit.Message)
+		if result != "" {
+			e.Summary += " "
+			e.Summary += result
 		}
 	}
 	c.Entries = append(c.Entries, e)

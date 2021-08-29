@@ -117,7 +117,7 @@ var generateCommand = &cobra.Command{
 
 		clf := changelog.NewClassifier()
 		clf.DefaultType = cfg.DefaultEntryType
-		clf.Rules = cfg.ClassifyRules
+		clf.ClassifyRules = cfg.ClassifyRules
 		clf.IgnoreMerge = cfg.IgnoreMerge
 
 		err = logs.ForEach(clf.ProcessCommit)

@@ -14,6 +14,7 @@ type Config struct {
 	RepositoryPath   string
 	IgnoreMerge      bool
 	ClassifyRules    []ClassifyRule
+	IssueExtractor   []IssueExtractor
 }
 
 func (c Config) Write(w io.Writer) error {
