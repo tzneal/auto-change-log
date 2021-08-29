@@ -77,7 +77,7 @@ func (r *Release) Cleanup() {
 	for i := 0; i < len(r.Entries); i++ {
 		if _, ok := existing[r.Entries[i]]; ok {
 			r.Entries = append(r.Entries[:i], r.Entries[i+1:]...)
-
+			i--
 		} else {
 			existing[r.Entries[i]] = struct{}{}
 		}

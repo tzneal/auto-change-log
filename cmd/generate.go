@@ -91,10 +91,11 @@ var generateCommand = &cobra.Command{
 				r = &cl.Releases[0]
 			}
 
-			// if since is not specified, start at the day after the last release so we don't
-			// duplicate log messages
+			// if since is not specified, start at the day of the last release so we don't
+			// duplicate log messages.  This still has duplicates if commits occurred on the day
+			// of the last release, but we de-dupe entries within a release later
 			if since == "" && len(cl.Releases) > 0 {
-				nextTime := cl.Releases[0].Date.Add(24 * time.Hour)
+				nextTime := cl.Releases[0].Date
 				lo.Since = &nextTime
 			}
 		}
