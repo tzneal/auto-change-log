@@ -60,7 +60,7 @@ func (c *ChangeLog) sortReleases() {
 }
 
 //## [Unreleased] - 2020-05-01
-var releaseParser = regexp.MustCompile("^## \\[(.*?)\\]\\s*-\\s*(\\d{4}-\\d{2}-\\d{2})")
+var releaseParser = regexp.MustCompile(`^## \[(.*?)]\s*-\s*(\d{4}-\d{2}-\d{2})`)
 
 func (c *ChangeLog) Read(r io.Reader) error {
 	scanner := bufio.NewScanner(r)
@@ -114,7 +114,7 @@ func (c *ChangeLog) Read(r io.Reader) error {
 				c.Header += "\n"
 				continue
 			}
-			return fmt.Errorf("unsupported line", line)
+			return fmt.Errorf("unsupported line: %s", line)
 		}
 	}
 

@@ -29,17 +29,13 @@ func TestChangeLog_SingleRelease(t *testing.T) {
 	r.Name = "1.0.0"
 	r.Date = time.UnixMilli(1234512345123)
 
-	err := cl.AddRelease(r)
-	if err != nil {
-		t.Fatalf("expected no errror, got %s", err)
-	}
-
+	cl.Releases = append(cl.Releases, r)
 	o := bytes.Buffer{}
-	_, err = cl.Write(&o)
+	_, err := cl.Write(&o)
 	if err != nil {
 		t.Fatalf("expected no error, got %s", err)
 	}
-	exp := "# Changelog\n## [1.0.0] - 2009-02-13\n"
+	exp := "# Changelog\n## [1.0.0] - 2009-02-13\n\n"
 	got := o.String()
 	if got != exp {
 		t.Errorf("expected '%s', got '%s'", printable(exp), printable(got))
@@ -64,13 +60,10 @@ func TestChangeLog_SingleReleaseWithEntries(t *testing.T) {
 			Summary: "New blah blah blah",
 		})
 
-	err := cl.AddRelease(r)
-	if err != nil {
-		t.Fatalf("expected no errror, got %s", err)
-	}
+	cl.Releases = append(cl.Releases, r)
 
 	o := bytes.Buffer{}
-	_, err = cl.Write(&o)
+	_, err := cl.Write(&o)
 	if err != nil {
 		t.Fatalf("expected no error, got %s", err)
 	}
@@ -88,6 +81,35 @@ func TestChangeLog_SingleReleaseWithEntries(t *testing.T) {
 		t.Errorf("expected '%s', got '%s'", printable(exp), printable(got))
 	}
 }
+
+func TestChangeLog_Read(t *testing.T) {
+	exp := `# Changelog
+## [1.0.0] - 2009-02-13
+### Added
+- New blah blah blah
+
+### Fixed
+- Bug was resolved
+
+`
+
+	cl := changelog.New()
+	err := cl.Read(strings.NewReader(exp))
+	if err != nil {
+		t.Fatalf("expected no error, got %s", err)
+	}
+	o := bytes.Buffer{}
+	_, err = cl.Write(&o)
+	if err != nil {
+		t.Fatalf("expected no error, got %s", err)
+	}
+
+	got := o.String()
+	if got != exp {
+		t.Errorf("expected '%s', got '%s'", printable(exp), printable(got))
+	}
+}
+
 func printable(got string) string {
 	r := strings.NewReplacer(
 		"\n", "\\n",

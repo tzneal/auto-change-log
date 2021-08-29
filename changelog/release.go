@@ -42,7 +42,7 @@ func (r *Release) Write(w io.Writer) (int, error) {
 				if err != nil {
 					return n, fmt.Errorf("error writing newline: %w", err)
 				}
-				b += n
+				n += b
 			}
 			current = ent.Type
 			b, err = fmt.Fprintf(w, "### %s\n", ent.Type)
@@ -64,10 +64,6 @@ func (r *Release) Write(w io.Writer) (int, error) {
 	}
 	n += b
 	return n, nil
-}
-
-func (r *Release) isValid() bool {
-	return !r.Date.IsZero() && r.Name != ""
 }
 
 func (r *Release) Cleanup() {

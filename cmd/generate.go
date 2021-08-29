@@ -44,6 +44,9 @@ var generateCommand = &cobra.Command{
 			repoPath = wd
 		}
 		repo, err := git.PlainOpen(repoPath)
+		if err != nil {
+			return fmt.Errorf("error opening repo: %w", err)
+		}
 		lo := &git.LogOptions{
 			Order: git.LogOrderCommitterTime,
 		}
@@ -138,9 +141,10 @@ var generateCommand = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("error opening %s: %w", cfg.Filename, err)
 		}
-		cl.Write(f)
-		f.Close()
-		return nil
+		if _, err = cl.Write(f); err != nil {
+			return fmt.Errorf("error writing changelog: %w", err)
+		}
+		return f.Close()
 	},
 }
 
