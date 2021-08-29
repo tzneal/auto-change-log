@@ -1,5 +1,7 @@
 package changelog
 
+import "fmt"
+
 type EntryType byte
 
 const (
@@ -11,6 +13,30 @@ const (
 	SecurityEntry
 )
 
+func (e *EntryType) UnmarshalYAML(b []byte) error {
+	s := string(b)
+	switch s {
+	case "Added":
+		*e = AddedEntry
+	case "Changed":
+		*e = ChangedEntry
+	case "Deprecated":
+		*e = DeprecatedEntry
+	case "Removed":
+		*e = RemovedEntry
+	case "Fixed":
+		*e = FixedEntry
+	case "Security":
+		*e = SecurityEntry
+	default:
+		return fmt.Errorf("unknown value '%s'", s)
+	}
+	return nil
+}
+
+func (e EntryType) MarshalYAML() (interface{}, error) {
+	return e.String(), nil
+}
 func (e EntryType) String() string {
 	switch e {
 	case AddedEntry:

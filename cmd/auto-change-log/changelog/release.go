@@ -17,7 +17,7 @@ func (r *Release) Write(w io.Writer) (int, error) {
 	n := 0
 	b, err := fmt.Fprintf(w, "## [%s] - %s\n", r.Name, r.Date.Format("2006-01-02"))
 	if err != nil {
-		return n, fmt.Errorf("error writing release: %w", err)
+		return n, fmt.Errorf("error writing Releases: %w", err)
 	}
 	n += b
 
@@ -68,4 +68,18 @@ func (r *Release) Write(w io.Writer) (int, error) {
 
 func (r *Release) isValid() bool {
 	return !r.Date.IsZero() && r.Name != ""
+}
+
+func (r *Release) Cleanup() {
+	existing := map[Entry]struct{}{}
+	// remove any duplicate entries. These can occur if running generation multiple
+	// times in the same day
+	for i := 0; i < len(r.Entries); i++ {
+		if _, ok := existing[r.Entries[i]]; ok {
+			r.Entries = append(r.Entries[:i], r.Entries[i+1:]...)
+
+		} else {
+			existing[r.Entries[i]] = struct{}{}
+		}
+	}
 }
