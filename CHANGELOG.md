@@ -1,6 +1,7 @@
 # Changelog
 ## [Unreleased] - 2021-08-28
 ### Added
+- add readme
 - add support for extracting issue numbers for changelog summary
 
 ### Changed

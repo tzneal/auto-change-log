@@ -28,6 +28,10 @@ func DefaultConfig() *Config {
 		IgnoreMerge:      true,
 		Filename:         "CHANGELOG.md",
 	}
+	cfg.IssueExtractor = append(cfg.IssueExtractor, IssueExtractor{
+		RegExp:  `(ISSUE-\d+)`,
+		LinkURL: "http://my.bug.tracker/$1/view",
+	})
 	cfg.ClassifyRules = append(cfg.ClassifyRules, ClassifyRule{
 		RegExp:    "(?i)\\b(removed|removing)\\b",
 		EntryType: RemovedEntry,
