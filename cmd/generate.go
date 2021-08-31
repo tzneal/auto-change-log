@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/spf13/cobra"
 	"github.com/tzneal/auto-change-log/changelog"
 )
@@ -119,6 +120,7 @@ var generateCommand = &cobra.Command{
 		clf.DefaultType = cfg.DefaultEntryType
 		clf.ClassifyRules = cfg.ClassifyRules
 		clf.IgnoreMerge = cfg.IgnoreMerge
+		clf.IssueExtractors = cfg.IssueExtractor
 
 		err = logs.ForEach(clf.ProcessCommit)
 		if err != nil {
@@ -148,19 +150,30 @@ var generateCommand = &cobra.Command{
 	},
 }
 
+
 func parseTimeFromTagOrTime(repo *git.Repository, value string) (time.Time, error) {
-	// do we have a tag?
-	tag, err := repo.Tag(value)
+	// do we have a valid ref at all?
+	ref, err := repo.Tag(value)
 	if err == nil {
-		cmt, err := repo.CommitObject(tag.Hash())
+		// look it up as a commit object by the has
+		cmt, err := repo.CommitObject(ref.Hash())
+		// lightweight ref lookup failed, so it must be an annotated tag
+		var tag *object.Tag
 		if err != nil {
-			return time.Time{}, fmt.Errorf("unable to find commit for tag %s hash %s: %w", value, tag.Hash(), err)
+			tag, err = repo.TagObject(ref.Hash())
+			if err != nil {
+				return time.Time{}, fmt.Errorf("unable to find commit for ref %s hash %s: %w", value, ref.Hash(), err)
+			}
+			cmt, err = repo.CommitObject(tag.Target)
+		}
+		if err != nil {
+			return time.Time{}, fmt.Errorf("unable to find commit for ref %s hash %s: %w", value, ref.Hash(), err)
 		}
 		return cmt.Committer.When, nil
 	} else {
 		t, err := time.ParseInLocation("2006-01-02", value, time.Now().Location())
 		if err != nil {
-			return time.Time{}, fmt.Errorf("unable to find tag %s and unable to parse as a time: %w", value, err)
+			return time.Time{}, fmt.Errorf("unable to find ref %s and unable to parse as a time: %w", value, err)
 		}
 		return t, nil
 	}
