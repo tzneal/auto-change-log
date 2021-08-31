@@ -79,6 +79,12 @@ var generateCommand = &cobra.Command{
 			r.Date = *lo.Until
 		}
 
+		// if a tag was specified as the 'until', then use it for the name instead of
+		// 'Unreleased'
+		if r.Name == "Unreleased" && !isDate(until) {
+			r.Name = until
+		}
+
 		newRelease := true
 		// are we appending to the changelog?
 		if cmd.Flags().Lookup("overwrite").Value.String() != "true" {
@@ -150,6 +156,10 @@ var generateCommand = &cobra.Command{
 	},
 }
 
+func isDate(value string) bool {
+	_, err := time.ParseInLocation("2006-01-02", value, time.Now().Location())
+	return err == nil
+}
 
 func parseTimeFromTagOrTime(repo *git.Repository, value string) (time.Time, error) {
 	// do we have a valid ref at all?
