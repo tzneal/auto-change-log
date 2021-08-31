@@ -46,6 +46,9 @@ func (c *Classifier) ProcessCommit(commit *object.Commit) error {
 	for _, ie := range c.IssueExtractors {
 		result := ie.Match(commit.Message)
 		if result != "" {
+			if ie.Remove {
+				e.Summary = ie.FilterSummary(e.Summary)
+			}
 			e.Summary += " "
 			e.Summary += result
 		}

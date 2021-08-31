@@ -10,6 +10,8 @@ import (
 type IssueExtractor struct {
 	RegExp  string
 	LinkURL string
+	Remove  bool
+	Label   string
 	regexp  *regexp.Regexp
 }
 
@@ -17,6 +19,15 @@ func (i *IssueExtractor) Compile() error {
 	var err error
 	i.regexp, err = regexp.Compile(i.RegExp)
 	return err
+}
+
+func (i *IssueExtractor) FilterSummary(s string) string {
+	if i.regexp == nil {
+		if err := i.Compile(); err != nil {
+			log.Fatalf("error matching: %e", err)
+		}
+	}
+	return i.regexp.ReplaceAllString(s, "")
 }
 
 func (i *IssueExtractor) Match(s string) string {
@@ -38,7 +49,11 @@ func (i *IssueExtractor) Match(s string) string {
 		}
 		if i.LinkURL != "" {
 			url := strings.Replace(i.LinkURL, "$1", match[1], -1)
-			op.WriteString(fmt.Sprintf("[%s](%s)", match[1], url))
+			label := match[1]
+			if i.Label != "" {
+				label = strings.Replace(i.Label, "$1", match[1], -1)
+			}
+			op.WriteString(fmt.Sprintf("[%s](%s)", label, url))
 		} else {
 			op.WriteString(match[1])
 
