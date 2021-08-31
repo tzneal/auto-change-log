@@ -81,7 +81,7 @@ var generateCommand = &cobra.Command{
 
 		// if a tag was specified as the 'until', then use it for the name instead of
 		// 'Unreleased'
-		if r.Name == "Unreleased" && !isDate(until) {
+		if until != "" && r.Name == "Unreleased" && !isDate(until) {
 			r.Name = until
 		}
 
