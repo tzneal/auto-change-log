@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 
 	"github.com/goccy/go-yaml"
 )
@@ -13,6 +14,7 @@ type Config struct {
 	DefaultEntryType EntryType
 	RepositoryPath   string
 	IgnoreMerge      bool
+	PathRegexp  string
 	ClassifyRules    []ClassifyRule
 	IssueExtractor   []IssueExtractor
 }
@@ -77,6 +79,12 @@ func OpenConfig(file string) (*Config, error) {
 		return nil, err
 	}
 
+	if cfg.PathRegexp != "" {
+		_, err = regexp.Compile(cfg.PathRegexp)
+		if err != nil {
+			return nil, fmt.Errorf("error compiling path regexp '%s': %w", cfg.PathRegexp, err)
+		}
+	}
 	for _, r := range cfg.ClassifyRules {
 		err = r.Compile()
 		if err != nil {
