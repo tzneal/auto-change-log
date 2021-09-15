@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"regexp"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -29,6 +30,7 @@ var generateCommand = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("error getting CWD: %w", err)
 		}
+
 		cfgFilename := path.Join(wd, ".auto-change-log")
 		var cfg *changelog.Config
 		if fi, _ := os.Stat(cfgFilename); fi == nil {
@@ -42,7 +44,8 @@ var generateCommand = &cobra.Command{
 		}
 		repoPath := cfg.RepositoryPath
 		if repoPath == "" {
-			repoPath = wd
+			// find a .git directory starting at cwd and looking up
+			repoPath = findGitDir(wd)
 		}
 		repo, err := git.PlainOpen(repoPath)
 		if err != nil {
@@ -127,6 +130,7 @@ var generateCommand = &cobra.Command{
 		clf.ClassifyRules = cfg.ClassifyRules
 		clf.IgnoreMerge = cfg.IgnoreMerge
 		clf.IssueExtractors = cfg.IssueExtractor
+		clf.PathRegexp = regexp.MustCompile(cfg.PathRegexp)
 
 		err = logs.ForEach(clf.ProcessCommit)
 		if err != nil {
@@ -187,4 +191,18 @@ func parseTimeFromTagOrTime(repo *git.Repository, value string) (time.Time, erro
 		}
 		return t, nil
 	}
+}
+
+// findGitDir starts in the directory passed recursively looking upwards to find
+// a .git directory
+func findGitDir(dir string) string {
+	original := dir
+	current := dir
+	for current != "" {
+		if _, err := os.Stat(path.Join(current, ".git")); err == nil {
+			return current
+		}
+		current = path.Clean(path.Join(current, ".."))
+	}
+	return original
 }
